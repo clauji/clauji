@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLAUJI — Locutora & Creativa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --orange: #D4602A;
+    --orange-light: #E8834F;
+    --orange-dim: #8B3E1A;
+    --cream: #F2EDE4;
+    --dark: #1A1714;
+    --dark2: #2A2420;
+    --mid: #4A3F38;
+    --muted: #8A7A70;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.03em;
+    background: var(--dark);
+    color: var(--cream);
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* CANVAS PARA FILM GRAIN ANIMADO */
+  #grain-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.5rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .nav-logo {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--orange);
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--cream); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    padding: 0 3rem;
+    gap: 4rem;
+    position: relative;
+  }
+
+  .hero-text { padding-top: 6rem; }
+
+  .hero-eyebrow {
+    font-size: 0.65rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 2.5rem;
+    height: 1px;
+    background: var(--orange);
+  }
+
+  h1 {
+    font-size: clamp(3.5rem, 7vw, 6rem);
+    font-weight: 300;
+    line-height: 0.92;
+    letter-spacing: -0.05em;
+    margin-bottom: 2rem;
+    color: var(--cream);
+  }
+
+  .hero-sub {
+    font-size: 0.85rem;
+    line-height: 1.75;
+    color: var(--muted);
+    max-width: 380px;
+    margin-bottom: 3rem;
+    letter-spacing: -0.01em;
+  }
+
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--cream);
+    text-decoration: none;
+    border-bottom: 1px solid var(--orange);
+    padding-bottom: 0.4rem;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .hero-cta:hover { color: var(--orange); }
+
+  .hero-cta::after {
+    content: '→';
+    transition: transform 0.2s;
+  }
+
+  .hero-cta:hover::after { transform: translateX(4px); }
+
+  /* FOTO DE PERFIL CON RECORTE OPTIMIZADO POR ABAJO */
+  .hero-photo {
+    position: relative;
+    height: 80vh;
+    max-height: 680px;
+  }
+
+  .photo-frame {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .photo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+  }
+
+  .photo-frame::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 75%, var(--dark) 100%);
+  }
+
+  .photo-tag {
+    position: absolute;
+    bottom: -1.5rem;
+    left: -1.5rem;
+    background: var(--orange);
+    color: var(--dark);
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 600;
+    padding: 0.6rem 1.2rem;
+    z-index: 2;
+  }
+
+  /* SECTION BASE */
+  section {
+    padding: 8rem 3rem;
+    position: relative;
+  }
+
+  .section-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 4rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--dark2);
+    max-width: 6rem;
+  }
+
+  /* MARQUEE BANNER */
+  .brands-marquee-section {
+    padding: 4rem 0;
+    background: var(--dark2);
+    border-top: 1px solid #3a322c;
+    border-bottom: 1px solid #3a322c;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .brands-title {
+    text-align: center;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--orange);
+    font-weight: 500;
+    padding: 0 2rem;
+  }
+
+  .marquee-wrapper {
+    display: flex;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .marquee-content {
+    display: flex;
+    gap: 4rem;
+    animation: marquee-scroll 50s linear infinite;
+    white-space: nowrap;
+    align-items: center;
+  }
+
+  .marquee-content img {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+    filter: brightness(0) invert(1) opacity(0.75);
+    transition: filter 0.3s ease, transform 0.3s ease;
+  }
+
+  .marquee-content img.logo-medium { height: 75px; }
+  .marquee-content img.logo-large { height: 110px; }
+
+  .marquee-content img:hover {
+    filter: brightness(0) invert(1) opacity(1);
+    transform: scale(1.05);
+  }
+
+  @keyframes marquee-scroll {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* DEMO SECTION */
+  .demo-section {
+    background: var(--dark2);
+    border-top: 1px solid #2A2420;
+    border-bottom: 1px solid #2A2420;
+  }
+
+  .demo-inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .demo-title {
+    font-size: clamp(2.2rem, 4.5vw, 3.5rem);
+    font-weight: 300;
+    letter-spacing: -0.04em;
+    margin-bottom: 0.75rem;
+    line-height: 1.1;
+  }
+
+  .demo-desc {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 3rem;
+  }
+
+  /* AUDIO PLAYER */
+  .audio-player {
+    background: var(--dark);
+    border: 1px solid #2A2420;
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .play-btn {
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--orange);
+    background: transparent;
+    color: var(--orange);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .play-btn:hover { background: var(--orange); color: var(--dark); }
+  .play-btn svg { width: 16px; height: 16px; }
+
+  .audio-progress-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .audio-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 2px;
+    background: #2A2420;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--orange);
+    width: 0%;
+  }
+
+  .audio-time {
+    font-size: 0.62rem;
+    color: var(--muted);
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* TRABAJOS: CARRUSEL CONTROLADO */
+  .carousel-container {
+    position: relative;
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+  }
+
+  .reels-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    display: flex;
+    gap: 2rem;
+    padding: 1rem 0.5rem;
+    scrollbar-width: none; 
+  }
+
+  .reels-wrapper::-webkit-scrollbar {
+    display: none;
+  }
+
+  .reel-card {
+    min-width: calc(33.333% - 1.34rem);
+    max-width: calc(33.333% - 1.34rem);
+    flex-shrink: 0;
+    background: var(--dark2);
+    border: 1px solid #2A2420;
+    overflow: hidden;
+    transition: border-color 0.25s, transform 0.25s;
+    display: block;
+  }
+
+  .reel-card:hover { 
+    border-color: var(--orange); 
+    transform: translateY(-4px);
+  }
+
+  .reel-thumb {
+    width: 100%;
+    aspect-ratio: 9/16;
+    max-height: 460px; /* Evita que queden gigantes de alto */
+    background: #000;
+    position: relative;
+  }
+
+  .reel-thumb iframe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    border: none;
+  }
+
+  .reel-info {
+    padding: 1rem 1.25rem;
+    background: var(--dark2);
+    border-top: 1px solid #332b26;
+  }
+
+  .reel-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--cream);
+    font-weight: 500;
+  }
+
+  /* BOTONES FLECHAS */
+  .carousel-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    background: rgba(26, 23, 20, 0.9);
+    border: 1px solid var(--orange);
+    color: var(--orange);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    font-size: 1.2rem;
+    transition: background 0.2s, color 0.2s, transform 0.2s;
+  }
+
+  .carousel-nav:hover {
+    background: var(--orange);
+    color: var(--dark);
+  }
+  
+  .carousel-nav:active { transform: translateY(-50%) scale(0.95); }
+
+  .carousel-nav.prev { left: -55px; }
+  .carousel-nav.next { right: -55px; }
+
+  /* CONTACT */
+  .contact-section {
+    background: var(--dark2);
+    text-align: center;
+  }
+
+  .contact-big {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 300;
+    letter-spacing: -0.05em;
+    line-height: 1.1;
+    margin-bottom: 2.5rem;
+  }
+
+  .contact-email {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cream);
+    text-decoration: none;
+    border: 1px solid var(--orange);
+    padding: 1rem 2.5rem;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .contact-email:hover { background: var(--orange); color: var(--dark); }
+
+  /* FOOTER */
+  footer {
+    padding: 2rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #2A2420;
+  }
+
+  .footer-logo {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--orange);
+  }
+
+  .footer-copy {
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+
+  .footer-ig a {
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .footer-ig a:hover { color: var(--orange); }
+
+  /* FADE IN ANIMATION */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 1200px) {
+    .carousel-container { max-width: 90%; }
+    .carousel-nav.prev { left: -30px; }
+    .carousel-nav.next { right: -30px; }
+  }
+
+  @media (max-width: 900px) {
+    .reel-card { 
+      min-width: calc(50% - 1rem); 
+      max-width: calc(50% - 1rem);
+    }
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 1.25rem 1.5rem; }
+    .nav-links { display: none; }
+
+    .hero {
+      grid-template-columns: 1fr;
+      padding: 0 1.5rem;
+      gap: 2rem;
+      min-height: auto;
+      padding-top: 7rem;
+      padding-bottom: 4rem;
+    }
+
+    .hero-photo {
+      height: 70vw;
+      max-height: 400px;
+      order: -1;
+    }
+
+    .photo-tag { bottom: -1rem; left: -1rem; }
+    section { padding: 5rem 1.5rem; }
+    
+    .reel-card { 
+      min-width: 78%; 
+      max-width: 78%;
+    }
+    .carousel-nav { display: none; } 
+    .carousel-container { max-width: 100%; }
+
+    .brands-marquee-section { padding: 3rem 0; gap: 1.5rem; }
+    .marquee-content { gap: 2.5rem; }
+    .marquee-content img { height: 30px; }
+    .marquee-content img.logo-medium { height: 48px; }
+    .marquee-content img.logo-large { height: 65px; }
+    footer { padding: 1.5rem; flex-direction: column; gap: 1rem; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="grain-canvas"></canvas>
+
+<nav>
+  <div class="nav-logo">Clauji</div>
+  <ul class="nav-links">
+    <li><a href="#demo">Demo</a></li>
+    <li><a href="#trabajo">Trabajo</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+  </ul>
+</nav>
+
+<!-- HERO SECTOR -->
+<section class="hero" id="inicio">
+  <div class="hero-text">
+    <div class="hero-eyebrow">Locutora · Madrid</div>
+    <h1 style="font-weight:900; letter-spacing:-0.06em;">Clauji</h1>
+    <p class="hero-sub">Locutora comercial y creativa.</p>
+    <a href="#contacto" class="hero-cta">Hablemos :)</a>
+  </div>
+  <div class="hero-photo fade-in">
+    <div class="photo-frame">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Clauji.jpeg" alt="Clauji">
+    </div>
+    <div class="photo-tag">Portafolio</div>
+  </div>
+</section>
+
+<!-- BANNER 1 -->
+<div class="brands-marquee-section">
+  <div class="brands-title">Puedes haberme escuchado en...</div>
+  <div class="marquee-wrapper">
+    <div class="marquee-content">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/FiftyKey.png" alt="FiftyKey">
+      <img class="logo-medium" src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Grefusa%20Logo.png" alt="Grefusa">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Heura%20Foods.png" alt="Heura Foods">
+      <img src="https://github.com/clauji/brands/blob/main/HypeBurger.png?raw=true" alt="Hype">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Infojobs.png" alt="Infojobs">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Liposan.png" alt="Liposan">
+      <img class="logo-large" src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Lola%20Lolita%20Land.png" alt="Lola Lolita Land">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Milfshakes.png" alt="Milfshakes">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Play%20Off%20Nations.png" alt="Play Off Nations">
+      <img class="logo-large" src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Scrap%20World.png" alt="Scrap World">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Telef%C3%B3nica.png" alt="Telefónica">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Tender%20Club.png" alt="Tender Club">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Trolli%20Chuches.png" alt="Trolli">
+      <!-- Bucle duplicado -->
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/FiftyKey.png" alt="FiftyKey">
+      <img class="logo-medium" src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Grefusa%20Logo.png" alt="Grefusa">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Heura%20Foods.png" alt="Heura Foods">
+      <img src="https://github.com/clauji/brands/blob/main/HypeBurger.png?raw=true" alt="Hype">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Infojobs.png" alt="Infojobs">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Liposan.png" alt="Liposan">
+      <img class="logo-large" src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Lola%20Lolita%20Land.png" alt="Lola Lolita Land">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Milfshakes.png" alt="Milfshakes">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Play%20Off%20Nations.png" alt="Play Off Nations">
+      <img class="logo-large" src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Scrap%20World.png" alt="Scrap World">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Telef%C3%B3nica.png" alt="Telefónica">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Tender%20Club.png" alt="Tender Club">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Trolli%20Chuches.png" alt="Trolli">
+    </div>
+  </div>
+</div>
+
+<!-- DEMO SECTION (CON TU AUDIO REAL DE GITHUB) -->
+<section class="demo-section" id="demo">
+  <div class="demo-inner fade-in">
+    <div class="section-label">DEMO</div>
+    <h2 class="demo-title">Quizás esto te suene bien.</h2>
+    <p class="demo-desc">Demo profesional · Reproducción Real</p>
+    
+    <audio id="audio-elemento" src="https://github.com/clauji/brands/raw/refs/heads/main/Demo.mp3" preload="metadata"></audio>
+
+    <div class="audio-player">
+      <button class="play-btn" id="play-btn" aria-label="Reproducir Demo">
+        <svg id="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <div class="audio-progress-wrap">
+        <div class="audio-label">DEMO LOCUCIÓN</div>
+        <div class="progress-bar" id="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+      </div>
+      <div class="audio-time" id="audio-time">0:00</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN TRABAJOS (CARRUSEL DE 5 VÍDEOS ENLAZADOS CORRECTAMENTE) -->
+<section id="trabajo">
+  <div class="section-label">ALGUNOS DE MIS TRABAJOS</div>
+  
+  <div class="carousel-container fade-in">
+    <!-- Flechas del carrusel -->
+    <button class="carousel-nav prev" id="prev-btn" aria-label="Anterior">←</button>
+    <button class="carousel-nav next" id="next-btn" aria-label="Siguiente">→</button>
+    
+    <!-- Contenedor Deslizante -->
+    <div class="reels-wrapper" id="carousel-wrapper">
+      
+      <!-- Video 1 -->
+      <div class="reel-card">
+        <div class="reel-thumb">
+          <iframe src="https://www.youtube.com/embed/0rb_-Xr9hec" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        <div class="reel-info">
+          <span class="reel-label">Proyecto · 01</span>
+        </div>
+      </div>
+
+      <!-- Video 2 -->
+      <div class="reel-card">
+        <div class="reel-thumb">
+          <iframe src="https://www.youtube.com/embed/cJmL9J6sqVQ" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        <div class="reel-info">
+          <span class="reel-label">Trabajo · 02</span>
+        </div>
+      </div>
+
+      <!-- Video 3 -->
+      <div class="reel-card">
+        <div class="reel-thumb">
+          <iframe src="https://www.youtube.com/embed/fhY-G1YEkDE" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        <div class="reel-info">
+          <span class="reel-label">Locución · 03</span>
+        </div>
+      </div>
+
+      <!-- Video 4 -->
+      <div class="reel-card">
+        <div class="reel-thumb">
+          <iframe src="https://www.youtube.com/embed/hkSva86iECU" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        <div class="reel-info">
+          <span class="reel-label">Campaña · 04</span>
+        </div>
+      </div>
+
+      <!-- Video 5 -->
+      <div class="reel-card">
+        <div class="reel-thumb">
+          <iframe src="https://www.youtube.com/embed/7Nw3w01tHTA" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        <div class="reel-info">
+          <span class="reel-label">Creatividad · 05</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- BANNER 2 -->
+<div class="brands-marquee-section" style="border-bottom: none;">
+  <div class="marquee-wrapper">
+    <div class="marquee-content">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/FiftyKey.png" alt="FiftyKey">
+      <img class="logo-medium" src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Grefusa%20Logo.png" alt="Grefusa">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Heura%20Foods.png" alt="Heura Foods">
+      <img src="https://github.com/clauji/brands/blob/main/HypeBurger.png?raw=true" alt="Hype">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Infojobs.png" alt="Infojobs">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Liposan.png" alt="Liposan">
+      <img class="logo-large" src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Lola%20Lolita%20Land.png" alt="Lola Lolita Land">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Milfshakes.png" alt="Milfshakes">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Play%20Off%20Nations.png" alt="Play Off Nations">
+      <img class="logo-large" src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Scrap%20World.png" alt="Scrap World">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Telef%C3%B3nica.png" alt="Telefónica">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Tender%20Club.png" alt="Tender Club">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Trolli%20Chuches.png" alt="Trolli">
+      <!-- Bucle duplicado -->
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/FiftyKey.png" alt="FiftyKey">
+      <img class="logo-medium" src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Grefusa%20Logo.png" alt="Grefusa">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Heura%20Foods.png" alt="Heura Foods">
+      <img src="https://github.com/clauji/brands/blob/main/HypeBurger.png?raw=true" alt="Hype">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Infojobs.png" alt="Infojobs">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Liposan.png" alt="Liposan">
+      <img class="logo-large" src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Lola%20Lolita%20Land.png" alt="Lola Lolita Land">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Milfshakes.png" alt="Milfshakes">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Play%20Off%20Nations.png" alt="Play Off Nations">
+      <img class="logo-large" src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Scrap%20World.png" alt="Scrap World">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Telef%C3%B3nica.png" alt="Telefónica">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Tender%20Club.png" alt="Tender Club">
+      <img src="https://raw.githubusercontent.com/clauji/brands/refs/heads/main/Trolli%20Chuches.png" alt="Trolli">
+    </div>
+  </div>
+</div>
+
+<!-- CONTACT -->
+<section class="contact-section" id="contacto">
+  <div class="contact-inner fade-in">
+    <div class="contact-big">¿Tu marca<br>necesita una voz?</div>
+    <a href="mailto:claujiiii@gmail.com" class="contact-email">claujiiii@gmail.com</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Clauji</div>
+  <div class="footer-copy">© 2026 — Todos los derechos reservados.</div>
+  <div class="footer-ig"><a href="https://www.instagram.com/claujii/" target="_blank" rel="noopener">Instagram</a></div>
+</footer>
+
+<script>
+  // FILM GRAIN ANIMADO
+  const canvas = document.getElementById('grain-canvas');
+  const ctx = canvas.getContext('2d');
+  
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function grain() {
+    const width = canvas.width;
+    const height = canvas.height;
+    ctx.clearRect(0, 0, width, height);
+    
+    const imgData = ctx.createImageData(width, height);
+    const data = imgData.data;
+    
+    for (let i = 0; i < data.length; i += 4) {
+      const value = Math.floor(Math.random() * 255);
+      data[i] = value;
+      data[i+1] = value;
+      data[i+2] = value;
+      data[i+3] = 12;
+    }
+    
+    ctx.putImageData(imgData, 0, 0);
+    requestAnimationFrame(grain);
+  }
+  grain();
+
+  // FADE IN OBSERVER
+  const observerOptions = { root: null, rootMargin: '0px', threshold: 0.1 };
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, observerOptions);
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // LÓGICA DEL CARRUSEL DESLIZANTE
+  const wrapper = document.getElementById('carousel-wrapper');
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
+
+  nextBtn.addEventListener('click', () => {
+    const cardWidth = wrapper.querySelector('.reel-card').clientWidth;
+    wrapper.scrollLeft += (cardWidth + 32); 
+  });
+
+  prevBtn.addEventListener('click', () => {
+    const cardWidth = wrapper.querySelector('.reel-card').clientWidth;
+    wrapper.scrollLeft -= (cardWidth + 32);
+  });
+
+  // CONTROLADOR DE AUDIO REAL (CONECTADO A TU RECURSO)
+  const audio = document.getElementById('audio-elemento');
+  const playBtn = document.getElementById('play-btn');
+  const progressFill = document.getElementById('progress-fill');
+  const progressBar = document.getElementById('progress-bar');
+  const audioTime = document.getElementById('audio-time');
+
+  playBtn.addEventListener('click', () => {
+    if (audio.paused) {
+      audio.play();
+      playBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+    } else {
+      audio.pause();
+      playBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+    }
+  });
+
+  audio.addEventListener('timeupdate', () => {
+    if (audio.duration) {
+      const percent = (audio.currentTime / audio.duration) * 100;
+      progressFill.style.width = percent + '%';
+      
+      const mins = Math.floor(audio.currentTime / 60);
+      const secs = Math.floor(audio.currentTime % 60);
+      audioTime.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
+    }
+  });
+
+  progressBar.addEventListener('click', (e) => {
+    const rect = progressBar.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const width = rect.width;
+    const clickPercent = clickX / width;
+    if (audio.duration) {
+      audio.currentTime = clickPercent * audio.duration;
+    }
+  });
+
+  audio.addEventListener('ended', () => {
+    playBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+    progressFill.style.width = '0%';
+    audioTime.textContent = '0:00';
+  });
+</script>
+</body>
+</html>
